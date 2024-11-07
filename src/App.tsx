@@ -4,10 +4,8 @@ import LabelForm from "./components/LabelForm.tsx";
 
 function App() {
   return (
-    <div className="App">
-      <div className="h-screen w-screen flex justify-center items-center">
-        <LabelForm />
-      </div>
+    <div className="h-screen w-screen bg-neutral-900 py-10 flex justify-center items-center">
+      <LabelForm />
     </div>
   );
 }
