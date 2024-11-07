@@ -16,7 +16,6 @@ function App() {
 
   const isQuickbooksEnabled =
     process.env.REACT_APP_IS_QUICKBOOKS_ENABLED === "true";
-
   return (
     <div className="h-screen w-screen bg-neutral-900 flex flex-col">
       {isQuickbooksEnabled && (
