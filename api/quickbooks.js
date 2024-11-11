@@ -1,7 +1,10 @@
+const crypto = require("crypto");
+
 module.exports = async (req, res) => {
   const CLIENT_ID = "ABeiD5tA86GbS5MlhBU3UWNhwaRzCL7F8bqr6eTMIJSNrmgdrw";
   const CLIENT_SECRET = "yaDemaaCTLWgEKu4J8QKd37WjR9t9BlCL6YBMUw9";
   const REDIRECT_URI = "https://label-print.vercel.app/api/quickbooks";
+  const STATE = crypto.randomBytes(16).toString("hex");
 
   if (req.method === "POST") {
     try {
@@ -12,23 +15,28 @@ module.exports = async (req, res) => {
       }
 
       console.log("Products to process:", products);
+
       res
         .status(200)
         .json({ message: "Data processed successfully", data: products });
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error processing request:", error);
       res
         .status(500)
         .json({ message: "Internal Server Error", error: error.message });
     }
   } else if (req.method === "GET") {
-    const { code } = req.query;
+    const { code, state } = req.query;
 
     if (!code) {
       const authorizationUrl = `https://appcenter.intuit.com/connect/oauth2?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(
         REDIRECT_URI
-      )}&scope=com.intuit.quickbooks.accounting&response_type=code`;
+      )}&scope=com.intuit.quickbooks.accounting&response_type=code&state=${STATE}`;
       return res.redirect(authorizationUrl);
+    }
+
+    if (state !== STATE) {
+      return res.status(403).json({ error: "Invalid state parameter" });
     }
 
     const url = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer";
@@ -65,14 +73,16 @@ module.exports = async (req, res) => {
       console.log("Refresh Token:", refreshToken);
       console.log("Realm ID:", realmId);
 
-      res.status(200).json({
-        message: "Tokens obtained",
-        accessToken,
-        refreshToken,
-        realmId,
-      });
+      res
+        .status(200)
+        .json({
+          message: "Tokens obtained",
+          accessToken,
+          refreshToken,
+          realmId,
+        });
     } catch (error) {
-      console.error("Error intercambiando el código por el token:", error);
+      console.error("Error exchanging code for token:", error);
       res.status(500).json({ error: "Failed to get access token" });
     }
   } else {
