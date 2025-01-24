@@ -24,22 +24,51 @@ const LabelForm = () => {
           labels.push({ clientNumber, wharehouseNumber, boxNumber: index });
         }
       }
+
       const printWindow = window.open("", "", "height=800,width=600");
       if (printWindow) {
         printWindow.document.write("<html><head><title>Labels</title>");
-        printWindow.document.write(
-          "<style>.label-print-page { page-break-before: always; font-family: Arial, sans-serif; }</style>"
-        );
-        printWindow.document.write("</head><body>");
+        printWindow.document.write(`
+          <style>
+            @media print {
+              .label-print-page {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                font-family: sans-serif;
+                background-color: #f0f8ff;
+                margin: 0;
+                page-break-before: always;
+                transform: rotate(90deg);
+              }
+  
+              .label-print-page p {
+                margin: 0;
+                width: 100%;
+                text-align: center;
+                font-size: 12vw;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              }
+            }
+          </style>
+        `);
+        printWindow.document.write("</head><body style='margin: 0;'>");
+
         labels.forEach((label) => {
-          printWindow?.document.write(`
+          printWindow.document.write(`
             <div class="label-print-page">
-              <p>Client Number: ${label.clientNumber}</p>
-              <p>Wharehouse Number: ${label.wharehouseNumber}</p>
-              <p>Box Number: ${label.boxNumber}</p>
+              <p>#: ${label.clientNumber}</p>
+              <p>W: ${label.wharehouseNumber}</p>
+              <p>U: ${label.boxNumber}</p>
             </div>
           `);
         });
+
         printWindow.document.write("</body></html>");
         printWindow.document.close();
         printWindow.print();
